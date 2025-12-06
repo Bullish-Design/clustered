@@ -6,7 +6,7 @@ __pycache__/
 # Personal Dev Environment:
 .devenv/**
 .direnv/**
-#.tmuxp.yaml
+.tmuxp.yaml
 .python-version
 devenv.lock
 uv.lock
