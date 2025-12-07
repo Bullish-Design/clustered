@@ -4,20 +4,20 @@ version = "0.1.0"
 description = "Clustering and morphology utilities built on top of Embeddify"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10"
-#dependencies = [
-#    "embeddify",
-#    "numpy",
-#    "pydantic>=2",
-#    "scikit-learn",
-#    "spacy",
-#]
+dependencies = [
+    "embeddify",
+    "numpy",
+    "pydantic>=2",
+    "scikit-learn",
+    "spacy",
+]
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 
-#[build-system]
-#requires = ["setuptools", "wheel"]
-#build-backend = "setuptools.build_meta"
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
-#[tool.uv.sources]
-#embeddy = { git = "https://github.com/Bullish-Design/embeddy.git" }
+[tool.uv.sources]
+embeddy = { git = "https://github.com/Bullish-Design/embeddy.git" }
