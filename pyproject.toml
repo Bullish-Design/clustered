@@ -3,9 +3,9 @@ name = "embeddy-clustering"
 version = "0.1.0"
 description = "Clustering and morphology utilities built on top of Embeddify"
 authors = [{ name = "Your Name", email = "you@example.com" }]
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 dependencies = [
-    "embeddify",
+    "embeddy",
     "numpy",
     "pydantic>=2",
     "scikit-learn",

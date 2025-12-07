@@ -16,7 +16,6 @@ def test_public_api_reexports():
         InflectionGroup,
     )
 
-    # Simple smoke-test that the symbols are importable
     assert EmbeddingSpace is not None
     assert ClusterConfig is not None
     assert Clusterer is not None

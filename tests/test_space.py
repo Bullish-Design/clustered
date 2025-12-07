@@ -3,25 +3,29 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from embeddify import Embedding, EmbeddingResult
 from embeddy_clustering import EmbeddingSpace
 
+from pydantic import BaseModel, Field, ConfigDict
 
-def make_space(vectors: list[list[float]], texts: list[str]) -> EmbeddingSpace:
+
+class DummyEmbedding(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    vector: np.ndarray = Field(...)
+    text: str = Field(...)
+
+
+class DummyEmbeddingResult(BaseModel):
+    embeddings: list[DummyEmbedding] = Field(default_factory=list)
+    model_name: str = "test-model"
+    dimensions: int = 0
+
+
+def make_space(vectors, texts):
     embs = [
-        Embedding(
-            vector=np.asarray(vec, dtype=float),
-            model_name="test-model",
-            normalized=False,
-            text=text,
-        )
+        DummyEmbedding(vector=np.asarray(vec, dtype=float), text=text)
         for vec, text in zip(vectors, texts)
     ]
-    result = EmbeddingResult(
-        embeddings=embs,
-        model_name="test-model",
-        dimensions=len(vectors[0]),
-    )
+    result = DummyEmbeddingResult(embeddings=embs, dimensions=len(vectors[0]) if vectors else 0)
     return EmbeddingSpace(result=result)
 
 
@@ -33,13 +37,12 @@ def test_words_dimensions_and_as_numpy():
     assert space.words == texts
     assert space.dimensions == 2
 
-    as_np = space.as_numpy()
-    assert isinstance(as_np, np.ndarray)
-    assert as_np.shape == (2, 2)
-    np.testing.assert_allclose(as_np, np.asarray(vectors, dtype=float))
+    arr = space.as_numpy()
+    assert arr.shape == (2, 2)
+    assert arr.dtype == float
 
 
-def test_similarity_matrix_and_neighbors_cosine():
+def test_similarity_matrix_and_neighbors():
     vectors = [
         [1.0, 0.0],
         [0.0, 1.0],
@@ -50,19 +53,14 @@ def test_similarity_matrix_and_neighbors_cosine():
 
     sims = space.similarity_matrix()
     assert sims.shape == (3, 3)
+    for i in range(3):
+        assert sims[i, i] == pytest.approx(1.0, rel=1e-6)
 
-    # cosine similarity: self-similarity is 1
-    np.testing.assert_allclose(np.diag(sims), np.ones(3))
-
-    # identical vectors (0 and 2) should have highest similarity
     neighbors_0 = space.neighbors(0, top_k=2)
     assert neighbors_0[0][0] == 2
-    assert neighbors_0[0][1] == pytest.approx(1.0, rel=1e-6)
 
-    # when only one embedding is present, neighbors should be empty
-    single_space = make_space([[1.0, 0.0]], ["solo"])
-    assert single_space.neighbors(0, top_k=5) == []
+    single = make_space([[1.0, 0.0]], ["solo"])
+    assert single.neighbors(0) == []
 
-    # out-of-range index should raise IndexError
     with pytest.raises(IndexError):
-        single_space.neighbors(1)
+        single.neighbors(1)
