@@ -72,37 +72,12 @@ class ClusterConfig(BaseModel):
         return value
 
 
-class ClusterMetrics(BaseModel):
-    """Quality metrics for a clustering run."""
-
-    silhouette_score: float | None = Field(default=None)
-    mean_internal_similarity: float | None = Field(default=None)
-
-
-class WordCluster(BaseModel):
-    """Cluster of words identified by the clustering algorithm."""
-
-    id: int
-    words: list[str]
-    centroid: str | None = None
-
-
-class ClusteringResult(BaseModel):
-    """Result of a clustering operation."""
-
-    clusters: list[WordCluster]
-    metrics: ClusterMetrics
-    method: str
-    n_clusters: int
-    assignments: dict[str, list[int]]
-    inflection_groups: list[InflectionGroup] | None = None
-
 class Clusterer(BaseModel):
     """Unified clusterer using membership-based architecture."""
 
     config: ClusterConfig
 
-    model_config = ConfigDict(arbitrary_types_allowed= True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def cluster(
         self,
@@ -242,6 +217,7 @@ class Clusterer(BaseModel):
         model = AgglomerativeClustering(n_clusters=n_clusters)
         labels = model.fit_predict(vectors)
 
+        # Convert to binary membership matrix
         memberships = np.zeros((len(vectors), n_clusters))
         memberships[np.arange(len(vectors)), labels] = 1.0
 
@@ -253,36 +229,25 @@ class Clusterer(BaseModel):
         vectors: np.ndarray,
         n_clusters: int,
     ) -> tuple[np.ndarray, int, np.ndarray]:
-        """Fuzzy c-means: continuous membership scores."""
-        from sklearn.metrics.pairwise import euclidean_distances
+        """Fuzzy c-means: continuous memberships."""
+        import skfuzzy as fuzz
 
-        # Initialize centers randomly
-        rng = np.random.RandomState(self.config.random_state)
-        idx = rng.choice(len(vectors), n_clusters, replace=False)
-        centers = vectors[idx]
+        # Transpose for skfuzzy (expects features x samples)
+        vectors_t = vectors.T
 
-        # Iterative fuzzy c-means (simplified version)
-        m = self.config.fuzzy_m
-        for _ in range(100):  # Max iterations
-            # Compute distances
-            distances = euclidean_distances(vectors, centers)
-            distances = np.maximum(distances, 1e-10)
+        # Run fuzzy c-means
+        cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
+            vectors_t,
+            c=n_clusters,
+            m=self.config.fuzzy_m,
+            error=0.005,
+            maxiter=1000,
+            init=None,
+            seed=self.config.random_state,
+        )
 
-            # Compute memberships using fuzzy logic
-            if m == 1.0:
-                # Hard clustering when m=1
-                memberships = np.zeros_like(distances)
-                memberships[np.arange(len(vectors)), distances.argmin(axis=1)] = 1.0
-            else:
-                # Fuzzy memberships
-                power = 2.0 / (m - 1.0)
-                inv_distances = 1.0 / distances
-                memberships = inv_distances**power
-                memberships = memberships / memberships.sum(axis=1, keepdims=True)
-
-            # Update centers
-            weighted = (memberships**m).T @ vectors
-            centers = weighted / (memberships**m).sum(axis=0, keepdims=True).T
+        # Transpose back to (samples, clusters)
+        memberships = u.T
 
         outliers = np.zeros(len(vectors), dtype=bool)
         return memberships, n_clusters, outliers

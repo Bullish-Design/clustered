@@ -96,7 +96,7 @@ class ClusteringResult(BaseModel):
     method: str = Field(description="Clustering method used")
     n_clusters: int = Field(description="Number of clusters produced")
     metrics: ClusterMetrics = Field(description="Quality metrics")
-    inflection_groups: list[InflectionGroup] | None = Field(
+    inflection_groups: list | None = Field(
         default=None,
         description="Inflection groupings if deduplication was used",
     )
