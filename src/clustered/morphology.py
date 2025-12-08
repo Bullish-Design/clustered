@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import Protocol, Any
+from typing import Protocol, Any, runtime_checkable
 
 from pydantic import BaseModel, Field, PrivateAttr
 
 
+@runtime_checkable
 class Lemmatizer(Protocol):
     """Simple protocol for lemmatization backends."""
 
-    def lemma(self, word: str) -> str:  # pragma: no cover - structural only
+    def lemma(self, word: str) -> str:  #  structural only
         ...
 
 
