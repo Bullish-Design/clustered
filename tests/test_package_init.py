@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import embeddy_clustering
+import clustered
 
 
 def test_public_api_reexports():
-    from embeddy_clustering import (
+    from clustered import (
         EmbeddingSpace,
         ClusterConfig,
         Clusterer,
@@ -28,7 +28,7 @@ def test_public_api_reexports():
 
 
 def test_all_contains_core_symbols():
-    public = set(getattr(embeddy_clustering, "__all__", []))
+    public = set(getattr(clustered, "__all__", []))
     expected = {
         "EmbeddingSpace",
         "ClusterConfig",
@@ -42,4 +42,4 @@ def test_all_contains_core_symbols():
     }
 
     missing = expected - public
-    assert not missing, f"Missing names from embeddy_clustering.__all__: {sorted(missing)}"
+    assert not missing, f"Missing names from clustered.__all__: {sorted(missing)}"

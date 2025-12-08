@@ -1,5 +1,5 @@
 [project]
-name = "embeddy-clustering"
+name = "clustered"
 version = "0.1.0"
 description = "Clustering and morphology utilities built on top of Embeddify"
 authors = [{ name = "Your Name", email = "you@example.com" }]

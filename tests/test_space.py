@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from embeddy_clustering import EmbeddingSpace
+from clustered import EmbeddingSpace
 
 from pydantic import BaseModel, Field, ConfigDict
 

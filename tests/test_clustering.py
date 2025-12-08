@@ -19,7 +19,7 @@ class DummyEmbeddingResult(BaseModel):
 import numpy as np
 import pytest
 
-from embeddy_clustering import ClusterConfig, Clusterer, EmbeddingSpace
+from clustered import ClusterConfig, Clusterer, EmbeddingSpace
 
 
 def make_space(vectors, texts):

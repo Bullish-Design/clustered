@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from embeddy_clustering.morphology import (
+from clustered.morphology import (
     InflectionGroup,
     Lemmatizer,
     SpacyLemmatizer,
